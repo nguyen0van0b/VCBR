@@ -29,7 +29,7 @@
   <h2>💼 Ví VCBR (Giao dịch nội bộ)</h2>
   <button onclick="connectWallet()">🔌 Kết nối MetaMask</button>
   <p><strong>Ví đang dùng:</strong> <span id="walletAddress">Chưa kết nối</span></p>
-  <p><strong>Số dư VCBR:</strong> <span id="vcbrBalance">0</span></p>
+  <p><strong>Số dư VCBR:</strong> <span id="vcbrBalance">0</span><span id="vcbrSymbol"></span></p>
   <p><strong>Số dư ETH:</strong> <span id="ethBalance">0</span> ETH</p>
 
   <hr>
@@ -64,7 +64,8 @@
       signer = provider.getSigner();
       const address = await signer.getAddress();
       document.getElementById("walletAddress").innerText = address;
-
+      const symbol = await vcbr.symbol();
+      document.getElementById("vcbrSymbol").innerText = symbol;
       vcbr = new ethers.Contract(contractAddress, abi, signer);
       updateBalances(address);
     }
