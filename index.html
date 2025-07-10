@@ -70,12 +70,12 @@
     }
 
     async function updateBalances(address) {
-      const ethBal = await provider.getBalance(address);
-      document.getElementById("ethBalance").innerText = ethers.utils.formatEther(ethBal);
-
-      const tokenBal = await vcbr.balanceOf(address);
+      const eth = await provider.getBalance(address);
+      const token = await vcbr.balanceOf(address);
       const decimals = await vcbr.decimals();
-      document.getElementById("vcbrBalance").innerText = ethers.utils.formatUnits(tokenBal, decimals);
+    
+      document.getElementById("ethBalance").innerText = ethers.utils.formatEther(eth);
+      document.getElementById("vcbrBalance").innerText = ethers.utils.formatUnits(token, decimals);
     }
 
     async function transferVCBR() {
