@@ -64,8 +64,8 @@
       signer = provider.getSigner();
       const address = await signer.getAddress();
       document.getElementById("walletAddress").innerText = address;
-      const symbol = await vcbr.symbol();
-      document.getElementById("vcbrSymbol").innerText = symbol;
+      
+      
       vcbr = new ethers.Contract(contractAddress, abi, signer);
       updateBalances(address);
     }
@@ -74,9 +74,12 @@
       const eth = await provider.getBalance(address);
       const token = await vcbr.balanceOf(address);
       const decimals = await vcbr.decimals();
-    
+      const symbol = await vcbr.symbol();
+
+      
       document.getElementById("ethBalance").innerText = ethers.utils.formatEther(eth);
       document.getElementById("vcbrBalance").innerText = ethers.utils.formatUnits(token, decimals);
+      document.getElementById("vcbrSymbol").innerText = symbol;
     }
 
     async function transferVCBR() {
