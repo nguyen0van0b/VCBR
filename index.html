@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VCBR Wallet DApp</title>
+  <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 30px; max-width: 600px; margin: auto; }
+    input, button { padding: 10px; margin: 8px 0; width: 100%; }
+    button { background-color: #008CBA; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #006f9b; }
+    hr { margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <script>
+    const allowedPassword = "vcbradmin2024";
+    function checkAccess() {
+      const pass = prompt("Nhập mật khẩu truy cập:");
+      if (pass !== allowedPassword) {
+        alert("Sai mật khẩu. Truy cập bị từ chối.");
+        document.body.innerHTML = "<h2>❌ Truy cập bị từ chối</h2>";
+      }
+    }
+    window.onload = checkAccess;
+  </script>
+
+  <h2>💼 Ví VCBR (Giao dịch nội bộ)</h2>
+  <button onclick="connectWallet()">🔌 Kết nối MetaMask</button>
+  <p><strong>Ví đang dùng:</strong> <span id="walletAddress">Chưa kết nối</span></p>
+  <p><strong>Số dư VCBR:</strong> <span id="vcbrBalance">0</span></p>
+  <p><strong>Số dư ETH:</strong> <span id="ethBalance">0</span> ETH</p>
+
+  <hr>
+  <h3>🚀 Gửi VCBR Token</h3>
+  <input type="text" id="vcbrReceiver" placeholder="Địa chỉ nhận VCBR" />
+  <input type="number" id="vcbrAmount" placeholder="Số lượng VCBR muốn gửi" />
+  <button onclick="transferVCBR()">Gửi VCBR</button>
+
+  <hr>
+  <h3>💸 Gửi ETH</h3>
+  <input type="text" id="ethReceiver" placeholder="Địa chỉ nhận ETH" />
+  <input type="number" id="ethAmount" placeholder="Số ETH muốn gửi (VD: 0.1)" />
+  <button onclick="transferETH()">Gửi ETH</button>
+
+  <script>
+      const contractAddress = "0x2Cb8296061f72769C6e3c218ddBeFD96f54CedBc";
+    const abi = [
+      "function name() view returns (string)",
+      "function symbol() view returns (string)",
+      "function decimals() view returns (uint8)",
+      "function balanceOf(address) view returns (uint256)",
+      "function transfer(address to, uint256 amount) returns (bool)"
+    ];
+
+    let provider, signer, vcbr;
+
+    async function connectWallet() {
+      if (!window.ethereum) return alert("Cài MetaMask trước nhé!");
+
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      const address = await signer.getAddress();
+      document.getElementById("walletAddress").innerText = address;
+
+      vcbr = new ethers.Contract(contractAddress, abi, signer);
+      updateBalances(address);
+    }
+
+    async function updateBalances(address) {
+      const ethBal = await provider.getBalance(address);
+      document.getElementById("ethBalance").innerText = ethers.utils.formatEther(ethBal);
+
+      const tokenBal = await vcbr.balanceOf(address);
+      const decimals = await vcbr.decimals();
+      document.getElementById("vcbrBalance").innerText = ethers.utils.formatUnits(tokenBal, decimals);
+    }
+
+    async function transferVCBR() {
+      const to = document.getElementById("vcbrReceiver").value;
+      const amount = document.getElementById("vcbrAmount").value;
+      const decimals = await vcbr.decimals();
+      const parsedAmount = ethers.utils.parseUnits(amount, decimals);
+      const tx = await vcbr.transfer(to, parsedAmount);
+      await tx.wait();
+      alert("Gửi VCBR thành công!");
+      const address = await signer.getAddress();
+      updateBalances(address);
+    }
+
+    async function transferETH() {
+      const to = document.getElementById("ethReceiver").value;
+      const amount = document.getElementById("ethAmount").value;
+      const tx = await signer.sendTransaction({ to, value: ethers.utils.parseEther(amount) });
+      await tx.wait();
+      alert("Gửi ETH thành công!");
+      const address = await signer.getAddress();
+      updateBalances(address);
+    }
+  </script>
+</body>
+</html>
